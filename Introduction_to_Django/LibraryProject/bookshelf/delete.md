@@ -3,13 +3,12 @@
 ```python
 from bookshelf.models import Book
 
-# Retrieve the Book instance
-b = Book.objects.get(title="Nineteen Eighty-Four")
+# Retrieve the book
+book = Book.objects.get(title="Nineteen Eighty-Four")
 
 # Delete the book
-b.delete()
+book.delete()
 
 # Confirm deletion
-print(Book.objects.all())
-# Output: <QuerySet []>
+print(Book.objects.all())  # Output: <QuerySet []>
 
