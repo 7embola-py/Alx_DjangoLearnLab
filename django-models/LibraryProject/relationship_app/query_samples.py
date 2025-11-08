@@ -1,25 +1,25 @@
-# relationship_app/query_samples.py
-import os
-import django
+# LibraryProject/relationship_app/query_samples.py
 
-# set Django settings module and initialize
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "LibraryProject.settings")
-django.setup()
+from .models import Author, Book, Library, Librarian
 
-from relationship_app.models import Author, Book, Library, Librarian
+# -------------------------------
+# 1. Query all books by a specific author
+# -------------------------------
+author_name = "Asmaa"
+author = Author.objects.get(name=author_name)
+books_by_author = author.book_set.all()
+print(f"Books by {author_name}: {list(books_by_author)}")
 
-# helper to create data safely using get_or_create
-author, _ = Author.objects.get_or_create(name="Asmaa")
+# -------------------------------
+# 2. List all books in a library
+# -------------------------------
+library_name = "City Library"
+library = Library.objects.get(name=library_name)
+books_in_library = library.books.all()
+print(f"Books in {library_name}: {list(books_in_library)}")
 
-book1, _ = Book.objects.get_or_create(title="Django Basics", author=author)
-book2, _ = Book.objects.get_or_create(title="Advanced Python", author=author)
-
-library, _ = Library.objects.get_or_create(name="City Library")
-library.books.add(book1, book2)
-
-librarian, _ = Librarian.objects.get_or_create(name="Khalid", library=library)
-
-# Queries:
-print("Books by Asmaa:", list(Author.objects.filter(name="Asmaa").first().book_set.all()))
-print("Books in library:", list(library.books.all()))
-print("Librarian for library:", Librarian.objects.get(library=library).name)
+# -------------------------------
+# 3. Retrieve the librarian for a library
+# -------------------------------
+librarian = Librarian.objects.get(library=library)
+print(f"Librarian for {library_name}: {librarian.name}")
