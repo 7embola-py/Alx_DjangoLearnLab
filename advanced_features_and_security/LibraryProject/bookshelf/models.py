@@ -1,3 +1,17 @@
+"""
+Permissions Setup Notes:
+- Custom permissions for Book model:
+    can_view, can_create, can_edit, can_delete
+
+Groups (created in Django admin):
+    Viewers → can_view
+    Editors → can_view, can_create, can_edit
+    Admins  → all permissions
+
+Views check permissions using @permission_required().
+"""
+
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
