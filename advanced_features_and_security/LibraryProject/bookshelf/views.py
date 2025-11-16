@@ -7,28 +7,18 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect
-
-
+from .forms import BookForm
 
 def form_example(request):
     if request.method == "POST":
-        title = request.POST.get("title", "").strip()
-        author = request.POST.get("author", "").strip()
-        year = request.POST.get("year", "").strip()
+        form = BookForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("book_list")
+    else:
+        form = BookForm()
 
-        # Basic validation
-        if title and author and year.isdigit():
-            Book.objects.create(
-                title=title,
-                author=author,
-                publication_year=int(year)
-            )
-            return redirect("book_list")  # go back to book list
-        else:
-            error = "Please provide valid input for all fields."
-            return render(request, "bookshelf/form_example.html", {"error": error})
-
-    return render(request, "bookshelf/form_example.html")
+    return render(request, "bookshelf/form_example.html", {"form": form})
 
 
 @login_required
