@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 
+
 # This middleware adds a basic Content Security Policy (CSP) header
 # CSP prevents the browser from loading scripts from untrusted sources (protects from XSS)
 
@@ -138,10 +139,17 @@ LOGOUT_REDIRECT_URL = 'login'
 
 
 
+
 # === Security Settings ===
 # These settings help protect against common web attacks (XSS, CSRF, clickjacking)
 # SECURE_* settings only take effect when HTTPS is enabled
 
+
+AUTH_USER_MODEL = 'bookshelf.CustomUser'
+
+
+# === Security-related settings ===
+# Browser protections
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'   # or 'SAMEORIGIN' if you intentionally embed pages in frames
@@ -155,4 +163,10 @@ SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = True
 SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
 SECURE_HSTS_PRELOAD = True
+
+SECURE_HSTS_PRELOAD = True
+
+
+
