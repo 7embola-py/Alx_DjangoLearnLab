@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-bb^f19u0e_ifka)1ca0yio%v1d1f49-)by1z)pda3pzu0$#-uy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+DEBUG = False
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split()
 
@@ -43,8 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-
-AUTH_USER_MODEL = "bookshelf.CustomUser"
+AUTH_USER_MODEL = "accounts.CustomUser"
 
 
 MIDDLEWARE = [
@@ -142,16 +141,14 @@ X_FRAME_OPTIONS = 'DENY'   # or 'SAMEORIGIN' if you intentionally embed pages in
 
 # HTTPS / cookie settings
 # These should be True in production (when using HTTPS). For local dev, they can be False.
-CSRF_COOKIE_SECURE = os.environ.get("DJANGO_ENABLE_HTTPS", "False") == "True"
-SESSION_COOKIE_SECURE = os.environ.get("DJANGO_ENABLE_HTTPS", "False") == "True"
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
-# Redirect HTTP to HTTPS in production (only enable when you have HTTPS set up)
-SECURE_SSL_REDIRECT = os.environ.get("DJANGO_ENABLE_HTTPS", "False") == "True"
 
-# HSTS — instruct browsers to use HTTPS for future requests (only enable in production with HTTPS)
-# Seconds; 0 disables it. When first enabling, use a small number (e.g. 60) to test, then raise.
-SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "0"))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", "False") == "True"
-SECURE_HSTS_PRELOAD = os.environ.get("DJANGO_SECURE_HSTS_PRELOAD", "False") == "True"
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
 
 
