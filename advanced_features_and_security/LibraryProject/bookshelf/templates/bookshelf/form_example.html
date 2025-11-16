@@ -1,0 +1,16 @@
+<!-- CSRF token prevents malicious sites from submitting forms on behalf of users -->
+
+<body>
+    <h1>Add Book</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <label>Title: <input type="text" name="title"></label><br>
+        <label>Author: <input type="text" name="author"></label><br>
+        <label>Publication Year: <input type="text" name="year"></label><br>
+        <button type="submit">Add Book</button>
+    </form>
+    <a href="{% url 'book_list' %}">Back to Book List</a>
+</body>

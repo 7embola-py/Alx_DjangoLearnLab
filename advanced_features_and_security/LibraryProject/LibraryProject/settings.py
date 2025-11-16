@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-bb^f19u0e_ifka)1ca0yio%v1d1f49-)by1z)pda3pzu0$#-uy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split()
 
 
 
@@ -43,8 +43,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+AUTH_USER_MODEL = "accounts.CustomUser"
 
-AUTH_USER_MODEL = 'accounts.CustomUser'
+# This middleware adds a basic Content Security Policy (CSP) header
+# CSP prevents the browser from loading scripts from untrusted sources (protects from XSS)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -54,7 +56,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'LibraryProject.security_middleware.ContentSecurityPolicyMiddleware',
 ]
+
+
 
 ROOT_URLCONF = 'LibraryProject.urls'
 
@@ -130,3 +135,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = 'list_books'
 LOGOUT_REDIRECT_URL = 'login'
+
+
+
+# === Security Settings ===
+# These settings help protect against common web attacks (XSS, CSRF, clickjacking)
+# SECURE_* settings only take effect when HTTPS is enabled
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'   # or 'SAMEORIGIN' if you intentionally embed pages in frames
+
+# HTTPS / cookie settings
+# These should be True in production (when using HTTPS). For local dev, they can be False.
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
