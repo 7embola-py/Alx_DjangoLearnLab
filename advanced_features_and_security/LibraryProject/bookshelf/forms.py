@@ -18,3 +18,8 @@ class BookForm(forms.ModelForm):
         if year < 0 or year > 9999:
             raise forms.ValidationError("Please enter a valid year.")
         return year
+
+class ExampleForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = ['title', 'author', 'publication_year']
