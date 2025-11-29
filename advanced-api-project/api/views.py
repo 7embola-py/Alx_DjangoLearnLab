@@ -18,7 +18,8 @@ class BookList(ListView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter) # Explicitly set filter backends
+    filter_backends = ('django_filters.rest_framework.DjangoFilterBackend', 'rest_framework.filters.SearchFilter', 'rest_framework.filters.OrderingFilter') # Explicitly set filter backends as strings
+
     filterset_fields = ['title', 'author', 'publication_year']
     search_fields = ['title', 'author__name']
     ordering_fields = ['title', 'publication_year']
