@@ -11,11 +11,15 @@ CreateView = generics.CreateAPIView
 UpdateView = generics.UpdateAPIView
 DeleteView = generics.DestroyAPIView
 
-# Provides a list view for all books, accessible to any user.
+# Provides a list view for all books, accessible to any user, with filtering, searching, and ordering.
 class BookList(ListView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly] # Changed to match direct import
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filterset_fields = ['title', 'author', 'publication_year']
+    search_fields = ['title', 'author__name']
+    ordering_fields = ['title', 'publication_year']
+
 
 # Provides a detail view for a single book, accessible to any user.
 class BookDetail(DetailView):
