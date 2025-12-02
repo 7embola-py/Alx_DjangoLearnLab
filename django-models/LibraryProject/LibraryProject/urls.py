@@ -19,7 +19,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('relationship/', include('relationship_app.urls')),  # Include your app URLs
+    path('', include('relationship_app.urls')),   # ✅ This line is required
+    path('accounts/', include('accounts.urls')),
 ]
 
 
