@@ -28,19 +28,23 @@ class PostDetailView(DetailView):
         context['comment_form'] = CommentForm()
         return context
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        comment_form = CommentForm(request.POST)
-        if comment_form.is_valid():
-            new_comment = comment_form.save(commit=False)
-            new_comment.post = self.object
-            new_comment.author = request.user
-            new_comment.save()
-            return redirect(self.object.get_absolute_url())
-        else:
-            context = self.get_context_data()
-            context['comment_form'] = comment_form
-            return self.render_to_response(context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comment_form'] = CommentForm()
+        return context
+
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('post-detail', kwargs={'pk': self.kwargs['pk']})
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):

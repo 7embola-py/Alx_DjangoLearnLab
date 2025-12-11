@@ -25,7 +25,7 @@ class CommentTest(TestCase):
         self.assertContains(response, 'Test Comment')
 
     def test_add_comment(self):
-        response = self.client.post(reverse('post-detail', kwargs={'pk': self.post.pk}), {
+        response = self.client.post(reverse('comment-create', kwargs={'pk': self.post.pk}), {
             'content': 'New Comment'
         })
         self.assertEqual(response.status_code, 302)  # Should redirect
