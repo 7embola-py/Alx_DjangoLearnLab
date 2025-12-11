@@ -9,7 +9,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-from .models import Post, Comment, Tag
+from .models import Post, Comment
+from taggit.models import Tag
 from django.db.models import Q
 from .forms import PostForm
 from django.urls import reverse_lazy
@@ -64,39 +65,16 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        response = super().form_valid(form)
-        tags_str = form.cleaned_data.get('tags')
-        if tags_str:
-            tags_list = [tag.strip() for tag in tags_str.split(',') if tag.strip()]
-            for tag_name in tags_list:
-                tag, created = Tag.objects.get_or_create(name=tag_name)
-                self.object.tags.add(tag)
-        return response
+        return super().form_valid(form)
 
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     form_class = PostForm
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        if self.object.tags.exists():
-            kwargs['initial']['tags'] = ', '.join([tag.name for tag in self.object.tags.all()])
-        return kwargs
-
     def form_valid(self, form):
         form.instance.author = self.request.user
-        response = super().form_valid(form)
-        tags_str = form.cleaned_data.get('tags')
-        if tags_str:
-            tags_list = [tag.strip() for tag in tags_str.split(',') if tag.strip()]
-            self.object.tags.clear()
-            for tag_name in tags_list:
-                tag, created = Tag.objects.get_or_create(name=tag_name)
-                self.object.tags.add(tag)
-        else:
-            self.object.tags.clear()
-        return response
+        return super().form_valid(form)
 
     def test_func(self):
         post = self.get_object()

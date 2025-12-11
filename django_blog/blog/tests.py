@@ -1,7 +1,8 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Post, Comment, Tag
+from .models import Post, Comment
+from taggit.models import Tag
 
 class CommentTest(TestCase):
     def setUp(self):
