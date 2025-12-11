@@ -9,9 +9,11 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-from .models import Post, Comment
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from .models import Post, Comment, Tag
+from django.db.models import Q
+from .forms import PostForm
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 class PostListView(ListView):
     model = Post
@@ -20,13 +22,22 @@ class PostListView(ListView):
     ordering = ['-published_date']
 
 
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/home.html'
+    context_object_name = 'posts'
+    ordering = ['-published_date']
+
+    def get_queryset(self):
+        tag_name = self.kwargs.get('tag_name')
+        if tag_name:
+            tag = get_object_or_404(Tag, name=tag_name)
+            return Post.objects.filter(tags=tag).order_by('-published_date')
+        return Post.objects.none()
+
+
 class PostDetailView(DetailView):
     model = Post
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['comment_form'] = CommentForm()
-        return context
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -49,26 +60,63 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    fields = ['title', 'content']
+    form_class = PostForm
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        tags_str = form.cleaned_data.get('tags')
+        if tags_str:
+            tags_list = [tag.strip() for tag in tags_str.split(',') if tag.strip()]
+            for tag_name in tags_list:
+                tag, created = Tag.objects.get_or_create(name=tag_name)
+                self.object.tags.add(tag)
+        return response
 
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    fields = ['title', 'content']
+    form_class = PostForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.object.tags.exists():
+            kwargs['initial']['tags'] = ', '.join([tag.name for tag in self.object.tags.all()])
+        return kwargs
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        tags_str = form.cleaned_data.get('tags')
+        if tags_str:
+            tags_list = [tag.strip() for tag in tags_str.split(',') if tag.strip()]
+            self.object.tags.clear()
+            for tag_name in tags_list:
+                tag, created = Tag.objects.get_or_create(name=tag_name)
+                self.object.tags.add(tag)
+        else:
+            self.object.tags.clear()
+        return response
 
     def test_func(self):
         post = self.get_object()
         if self.request.user == post.author:
             return True
         return False
+
+
+def search(request):
+    query = request.GET.get('q')
+    if query:
+        results = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+    else:
+        results = Post.objects.none()
+    
+    return render(request, 'blog/search_results.html', {'posts': results, 'query': query})
 
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

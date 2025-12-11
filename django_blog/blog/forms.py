@@ -23,6 +23,8 @@ class ProfileUpdateForm(forms.ModelForm):
         fields = ['image']
 
 class PostForm(forms.ModelForm):
+    tags = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+
     class Meta:
         model = Post
         fields = ['title', 'content']

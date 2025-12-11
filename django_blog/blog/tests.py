@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Post, Comment
+from .models import Post, Comment, Tag
 
 class CommentTest(TestCase):
     def setUp(self):
@@ -43,3 +43,36 @@ class CommentTest(TestCase):
         response = self.client.post(reverse('comment-delete', kwargs={'pk': self.comment.pk}))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Comment.objects.filter(pk=self.comment.pk).exists())
+
+class TagSearchTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client = Client()
+        self.client.login(username='testuser', password='password')
+        
+    def test_create_post_with_tags(self):
+        response = self.client.post(reverse('post-create'), {
+            'title': 'Tagged Post',
+            'content': 'Content',
+            'tags': 'django, python'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Post.objects.filter(title='Tagged Post').exists())
+        post = Post.objects.get(title='Tagged Post')
+        self.assertEqual(post.tags.count(), 2)
+        self.assertTrue(post.tags.filter(name='django').exists())
+
+    def test_search_posts(self):
+        post = Post.objects.create(title='Searchable Post', content='Content', author=self.user)
+        response = self.client.get(reverse('search'), {'q': 'Searchable'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Searchable Post')
+
+    def test_filter_by_tag(self):
+        tag = Tag.objects.create(name='testtag')
+        post = Post.objects.create(title='Tagged Post', content='Content', author=self.user)
+        post.tags.add(tag)
+        
+        response = self.client.get(reverse('tags-posts', kwargs={'tag_name': 'testtag'}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Tagged Post')

@@ -14,6 +14,14 @@
     </div>
     <h2 class="article-title">{{ object.title }}</h2>
     <p class="article-content">{{ object.content }}</p>
+    {% if object.tags.all %}
+    <p>
+      Tags:
+      {% for tag in object.tags.all %}
+      <a class="badge badge-secondary" href="{% url 'tags-posts' tag.name %}">{{ tag.name }}</a>
+      {% endfor %}
+    </p>
+    {% endif %}
   </div>
 </article>
 
