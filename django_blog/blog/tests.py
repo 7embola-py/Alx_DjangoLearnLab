@@ -70,10 +70,10 @@ class TagSearchTest(TestCase):
         self.assertContains(response, 'Searchable Post')
 
     def test_filter_by_tag(self):
-        tag = Tag.objects.create(name='testtag')
+        tag = Tag.objects.create(name='testtag', slug='testtag')
         post = Post.objects.create(title='Tagged Post', content='Content', author=self.user)
         post.tags.add(tag)
         
-        response = self.client.get(reverse('tags-posts', kwargs={'tag_name': 'testtag'}))
+        response = self.client.get(reverse('tags-posts', kwargs={'tag_slug': 'testtag'}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Tagged Post')

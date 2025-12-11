@@ -30,9 +30,9 @@ class PostByTagListView(ListView):
     ordering = ['-published_date']
 
     def get_queryset(self):
-        tag_name = self.kwargs.get('tag_name')
-        if tag_name:
-            tag = get_object_or_404(Tag, name=tag_name)
+        tag_slug = self.kwargs.get('tag_slug')
+        if tag_slug:
+            tag = get_object_or_404(Tag, slug=tag_slug)
             return Post.objects.filter(tags=tag).order_by('-published_date')
         return Post.objects.none()
 
