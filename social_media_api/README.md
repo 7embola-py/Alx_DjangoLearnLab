@@ -128,3 +128,16 @@ This is a Django-based Social Media API that allows users to register, log in, a
     *   **Authentication:** Requires Token Authentication. Only the author can update.
 *   **Delete Comment:** `DELETE /api/posts/{post_id}/comments/{id}/`
     *   **Authentication:** Requires Token Authentication. Only the author can delete.
+
+### Social
+
+*   **Follow User:** `POST /api/accounts/follow/{user_id}/`
+    *   **Authentication:** Requires Token Authentication.
+*   **Unfollow User:** `POST /api/accounts/unfollow/{user_id}/`
+    *   **Authentication:** Requires Token Authentication.
+
+### Feed
+
+*   **Get Feed:** `GET /api/feed/`
+    *   **Authentication:** Requires Token Authentication.
+    *   **Response:** A paginated list of posts from users the current user follows.
