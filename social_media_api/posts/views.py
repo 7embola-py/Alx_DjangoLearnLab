@@ -1,8 +1,11 @@
-from rest_framework import viewsets, permissions, filters, generics
+from rest_framework import viewsets, permissions, filters, generics, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
-from .models import Post, Comment
+from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsAuthorOrReadOnly
+from notifications.utils import create_notification
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
@@ -37,7 +40,9 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         post = Post.objects.get(pk=self.kwargs['post_pk'])
-        serializer.save(author=self.request.user, post=post)
+        comment = serializer.save(author=self.request.user, post=post)
+        if post.author != self.request.user:
+            create_notification(post.author, self.request.user, 'commented on', comment)
 
 class FeedView(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -47,3 +52,23 @@ class FeedView(generics.ListAPIView):
     def get_queryset(self):
         following_users = self.request.user.following.all()
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
+
+class LikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
+        like, created = Like.objects.get_or_create(author=request.user, post=post)
+        if created:
+            if post.author != request.user:
+                create_notification(post.author, request.user, 'liked', post)
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class UnlikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
+        Like.objects.filter(author=request.user, post=post).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

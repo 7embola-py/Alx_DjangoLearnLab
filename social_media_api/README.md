@@ -141,3 +141,17 @@ This is a Django-based Social Media API that allows users to register, log in, a
 *   **Get Feed:** `GET /api/feed/`
     *   **Authentication:** Requires Token Authentication.
     *   **Response:** A paginated list of posts from users the current user follows.
+
+### Likes
+
+*   **Like Post:** `POST /api/posts/{post_id}/like/`
+    *   **Authentication:** Requires Token Authentication.
+*   **Unlike Post:** `POST /api/posts/{post_id}/unlike/`
+    *   **Authentication:** Requires Token Authentication.
+
+### Notifications
+
+*   **List Notifications:** `GET /api/notifications/`
+    *   **Authentication:** Requires Token Authentication.
+*   **Mark Notification as Read:** `PUT /api/notifications/{notification_id}/read/`
+    *   **Authentication:** Requires Token Authentication.
