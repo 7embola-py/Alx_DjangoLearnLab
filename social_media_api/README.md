@@ -93,3 +93,38 @@ This is a Django-based Social Media API that allows users to register, log in, a
             "bio": "This is my updated bio."
         }
         ```
+
+### Posts
+
+*   **List Posts:** `GET /api/posts/`
+*   **Create Post:** `POST /api/posts/`
+    *   **Authentication:** Requires Token Authentication.
+    *   **Body:**
+        ```json
+        {
+            "title": "My First Post",
+            "content": "This is the content of my first post."
+        }
+        ```
+*   **Retrieve Post:** `GET /api/posts/{id}/`
+*   **Update Post:** `PUT /api/posts/{id}/`, `PATCH /api/posts/{id}/`
+    *   **Authentication:** Requires Token Authentication. Only the author can update.
+*   **Delete Post:** `DELETE /api/posts/{id}/`
+    *   **Authentication:** Requires Token Authentication. Only the author can delete.
+
+### Comments
+
+*   **List Comments for a Post:** `GET /api/posts/{post_id}/comments/`
+*   **Create Comment on a Post:** `POST /api/posts/{post_id}/comments/`
+    *   **Authentication:** Requires Token Authentication.
+    *   **Body:**
+        ```json
+        {
+            "content": "This is a comment on the post."
+        }
+        ```
+*   **Retrieve Comment:** `GET /api/posts/{post_id}/comments/{id}/`
+*   **Update Comment:** `PUT /api/posts/{post_id}/comments/{id}/`, `PATCH /api/posts/{post_id}/comments/{id}/`
+    *   **Authentication:** Requires Token Authentication. Only the author can update.
+*   **Delete Comment:** `DELETE /api/posts/{post_id}/comments/{id}/`
+    *   **Authentication:** Requires Token Authentication. Only the author can delete.
