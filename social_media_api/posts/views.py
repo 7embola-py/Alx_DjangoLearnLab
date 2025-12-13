@@ -1,7 +1,5 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, filters, generics, status
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
@@ -40,7 +38,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.filter(post=self.kwargs['post_pk'])
 
     def perform_create(self, serializer):
-        post = get_object_or_404(Post, pk=self.kwargs['post_pk'])
+        post = generics.get_object_or_404(Post, pk=self.kwargs['post_pk'])
         comment = serializer.save(author=self.request.user, post=post)
         if post.author != self.request.user:
             Notification.objects.create(recipient=post.author, actor=self.request.user, verb='commented on', target=comment)
@@ -54,11 +52,12 @@ class FeedView(generics.ListAPIView):
         following_users = self.request.user.following.all()
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
 
-class LikePostView(APIView):
+class LikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Post.objects.all()
 
-    def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+    def post(self, request, *args, **kwargs):
+        post = self.get_object()
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if created:
             if post.author != request.user:
@@ -66,11 +65,11 @@ class LikePostView(APIView):
             return Response(status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-class UnlikePostView(APIView):
+class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Post.objects.all()
 
-    def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+    def post(self, request, *args, **kwargs):
+        post = self.get_object()
         Like.objects.filter(user=request.user, post=post).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
