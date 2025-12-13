@@ -85,6 +85,7 @@ DATABASES = {
         default='sqlite:///' + str(BASE_DIR / 'db.sqlite3')
     )
 }
+# 'PORT': '5432'
 
 
 # Password validation
