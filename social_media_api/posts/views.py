@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, filters, generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -5,7 +6,7 @@ from rest_framework.pagination import PageNumberPagination
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsAuthorOrReadOnly
-from notifications.utils import create_notification
+from notifications.models import Notification
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
@@ -39,10 +40,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.filter(post=self.kwargs['post_pk'])
 
     def perform_create(self, serializer):
-        post = Post.objects.get(pk=self.kwargs['post_pk'])
+        post = get_object_or_404(Post, pk=self.kwargs['post_pk'])
         comment = serializer.save(author=self.request.user, post=post)
         if post.author != self.request.user:
-            create_notification(post.author, self.request.user, 'commented on', comment)
+            Notification.objects.create(recipient=post.author, actor=self.request.user, verb='commented on', target=comment)
 
 class FeedView(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -54,39 +55,22 @@ class FeedView(generics.ListAPIView):
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
 
 class LikePostView(APIView):
-
     permission_classes = [permissions.IsAuthenticated]
 
-
-
     def post(self, request, pk):
-
-        post = Post.objects.get(pk=pk)
-
+        post = get_object_or_404(Post, pk=pk)
         like, created = Like.objects.get_or_create(user=request.user, post=post)
-
         if created:
-
             if post.author != request.user:
-
-                create_notification(post.author, request.user, 'liked', post)
-
+                Notification.objects.create(recipient=post.author, actor=request.user, verb='liked', target=post)
             return Response(status=status.HTTP_201_CREATED)
-
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-
-
 class UnlikePostView(APIView):
-
     permission_classes = [permissions.IsAuthenticated]
 
-
-
     def post(self, request, pk):
-
-        post = Post.objects.get(pk=pk)
-
+        post = get_object_or_404(Post, pk=pk)
         Like.objects.filter(user=request.user, post=post).delete()
-
         return Response(status=status.HTTP_204_NO_CONTENT)
+

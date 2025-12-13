@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 from .models import CustomUser
-from notifications.utils import create_notification
+from notifications.models import Notification
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -52,7 +52,7 @@ class FollowUserView(generics.GenericAPIView):
         if user_to_follow == request.user:
             return Response({"detail": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
         request.user.following.add(user_to_follow)
-        create_notification(user_to_follow, request.user, 'started following you', request.user)
+        Notification.objects.create(recipient=user_to_follow, actor=request.user, verb='started following you', target=request.user)
         return Response({"detail": f"You are now following {user_to_follow.username}."}, status=status.HTTP_200_OK)
 
 class UnfollowUserView(generics.GenericAPIView):
