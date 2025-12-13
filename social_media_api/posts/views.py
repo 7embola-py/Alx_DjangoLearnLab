@@ -54,21 +54,39 @@ class FeedView(generics.ListAPIView):
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
 
 class LikePostView(APIView):
+
     permission_classes = [permissions.IsAuthenticated]
 
+
+
     def post(self, request, pk):
+
         post = Post.objects.get(pk=pk)
-        like, created = Like.objects.get_or_create(author=request.user, post=post)
+
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+
         if created:
+
             if post.author != request.user:
+
                 create_notification(post.author, request.user, 'liked', post)
+
             return Response(status=status.HTTP_201_CREATED)
+
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
+
 class UnlikePostView(APIView):
+
     permission_classes = [permissions.IsAuthenticated]
 
+
+
     def post(self, request, pk):
+
         post = Post.objects.get(pk=pk)
-        Like.objects.filter(author=request.user, post=post).delete()
+
+        Like.objects.filter(user=request.user, post=post).delete()
+
         return Response(status=status.HTTP_204_NO_CONTENT)
