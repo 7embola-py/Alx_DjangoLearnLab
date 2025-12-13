@@ -1,8 +1,8 @@
 from rest_framework import generics, permissions
-from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from .serializers import UserSerializer, RegisterSerializer
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 from .models import CustomUser
 
 class RegisterView(generics.CreateAPIView):
@@ -20,11 +20,13 @@ class RegisterView(generics.CreateAPIView):
             'token': token.key
         })
 
-class LoginView(ObtainAuthToken):
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        user = serializer.validated_data
         token, created = Token.objects.get_or_create(user=user)
         return Response({
             'token': token.key,
